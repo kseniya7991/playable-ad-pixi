@@ -1,6 +1,7 @@
 import { Container } from "pixi.js";
 import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
 import Background from "./Background";
+import Logo from "./Logo";
 
 export class Scene {
     constructor(app) {
@@ -19,6 +20,7 @@ export class Scene {
         subscribeToResize(this);
 
         this.background = new Background(this.app);
+        this.logo = new Logo(this.app);
     }
 
     onResize() {
