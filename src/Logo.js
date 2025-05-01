@@ -13,7 +13,5 @@ export default class Logo extends Sprite {
 
         this.scale.set(250 / texture.width);
         this.position.set(20,20);
-
-        this.app.stage.addChild(this);
     }
 }

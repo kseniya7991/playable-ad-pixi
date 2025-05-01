@@ -15,7 +15,6 @@ export default class Background extends Sprite {
         this.anchor.set(0.5);
         this.position.set(0, 0);
 
-        this.app.zoomContainer.addChild(this);
         subscribeToResize(this);
     }
 
