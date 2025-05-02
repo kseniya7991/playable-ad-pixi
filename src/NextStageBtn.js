@@ -5,7 +5,6 @@ import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
 export default class NextStageBtn {
     constructor(app) {
         this.app = app;
-        this.init();
     }
 
     init() {
@@ -15,6 +14,7 @@ export default class NextStageBtn {
 
         this.addBtn();
         subscribeToResize(this);
+        return this.button;
     }
 
     addBtn() {
@@ -57,10 +57,8 @@ export default class NextStageBtn {
         this.button.eventMode = "static";
         this.button.cursor = "pointer";
 
-        this.button.on("pointerdown", (e) => console.log("clicked"));
         this.button.on("pointerover", (e) => {
             this.shadowFilter.alpha = 0.6;
-            this.button.fill({ color: "red" });
         });
         this.button.on("pointerout", (e) => (this.shadowFilter.alpha = 0.3));
     }

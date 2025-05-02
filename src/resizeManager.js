@@ -6,7 +6,7 @@ export const initResizeManager = () => {
         "resize",
         debounce(() => {
             onWindowResize();
-        }, 100)
+        }, 0)
     );
 }
 
