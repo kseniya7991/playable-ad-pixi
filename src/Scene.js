@@ -6,6 +6,10 @@ import PlayBtn from "./PlayBtn";
 import NextStageBtn from "./NextStageBtn";
 import StageOne from "./StageOne";
 
+import Resources from "./Resources";
+import sources from "./sources";
+
+
 export class Scene {
     constructor(app) {
         this.app = app;
@@ -22,7 +26,9 @@ export class Scene {
         this.zoomTicker = null;
     }
 
-    init() {
+    async init() {
+        this.app.resources = await new Resources(sources).startLoading();
+       
         this.background = new Background(this.app);
         this.logo = new Logo(this.app);
         this.playBtn = new PlayBtn(this.app);

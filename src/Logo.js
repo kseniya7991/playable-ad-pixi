@@ -1,4 +1,4 @@
-import { Assets, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
 
 export default class Logo extends Sprite {
     constructor(app) {
@@ -8,7 +8,7 @@ export default class Logo extends Sprite {
     }
 
     async init() {
-        const texture = await Assets.load("/assets/logo.png");
+        const texture = this.app.resources["logo"];
         this.texture = texture;
 
         this.scale.set(250 / texture.width);

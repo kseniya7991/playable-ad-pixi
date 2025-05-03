@@ -1,4 +1,4 @@
-import { Assets, Container, Graphics, Text, AnimatedSprite } from "pixi.js";
+import { Container, Graphics, Text, AnimatedSprite } from "pixi.js";
 import { DropShadowFilter } from "pixi-filters";
 import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
 
@@ -64,7 +64,7 @@ export default class NextStageBtn {
     }
 
     async addWhiteHandAnimation() {
-        const spriteSheet = await Assets.load("/assets/white-hand-sprite.json");
+        const spriteSheet = this.app.resources["whiteHandSprite"];
         this.animWhiteHand = new AnimatedSprite(spriteSheet.animations.WhiteHand);
 
         this.animWhiteHand.position.set(130, 90);

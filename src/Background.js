@@ -1,4 +1,4 @@
-import { Assets, Sprite } from "pixi.js";
+import { Sprite } from "pixi.js";
 import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
 
 export default class Background extends Sprite {
@@ -9,7 +9,7 @@ export default class Background extends Sprite {
     }
 
     async init() {
-        const texture = await Assets.load("/assets/map.png");
+        const texture = this.app.resources["background"];
         this.texture = texture;
 
         this.anchor.set(0.5);
