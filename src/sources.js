@@ -5,7 +5,7 @@ export default [
     },
     {
         alias: "logo",
-        src:"/assests/logo.png"
+        src:"/assets/logo.png"
     },
     {
         alias: "whiteHandSprite",

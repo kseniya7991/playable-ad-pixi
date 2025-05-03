@@ -1,4 +1,4 @@
-import { Sprite } from "pixi.js";
+import { Assets, Sprite } from "pixi.js";
 import { getOS } from "./utils";
 
 export default class PlayBtn extends Sprite {
@@ -9,7 +9,7 @@ export default class PlayBtn extends Sprite {
     }
 
     async init() {
-        const texture = this.app.resources["playBtn"];
+        const texture = Assets.get('playBtn');
         this.texture = texture;
 
         const scale = 200 / texture.width;
