@@ -5,16 +5,16 @@ import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
 export default class NextStageBtn {
     constructor(app) {
         this.app = app;
+        
     }
 
     init() {
         this.container = new Container();
         this.container.zIndex = 100;
-        this.app.stage.addChild(this.container);
 
         this.addBtn();
         subscribeToResize(this);
-        return this.button;
+        return this;
     }
 
     addBtn() {
@@ -43,9 +43,11 @@ export default class NextStageBtn {
 
         this.button.filters = [this.shadowFilter];
 
+        this.container.pivot.set(this.button.width, this.button.height);
+
         this.container.position.set(
-            this.app.screen.width - 80 - this.button.width,
-            this.app.screen.height - 100 - this.button.height
+            this.app.screen.width - 80,
+            this.app.screen.height - 100
         );
 
         this.container.addChild(this.button, btnText);
@@ -90,9 +92,10 @@ export default class NextStageBtn {
     }
 
     onResize() {
+
         this.container.position.set(
-            this.app.screen.width - 80 - this.button.width,
-            this.app.screen.height - 100 - this.button.height
+            this.app.screen.width - 80 * this.app.scale,
+            this.app.screen.height - 100 * this.app.scale,
         );
     }
 
