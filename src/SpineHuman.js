@@ -10,8 +10,7 @@ export default class SpineHuman {
 
     async init() {
         this.container = new Container();
-        this.container.zIndex = 20000;
-
+      
         this.spine = Spine.from({
             skeleton: "spineSkeleton",
             atlas: "spineAtlas",

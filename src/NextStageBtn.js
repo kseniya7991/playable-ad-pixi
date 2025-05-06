@@ -1,17 +1,18 @@
-import { Container, Graphics, Text, AnimatedSprite } from "pixi.js";
+import { Container, Graphics, Text, AnimatedSprite, Assets } from "pixi.js";
 import { DropShadowFilter } from "pixi-filters";
 import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
 
 export default class NextStageBtn {
     constructor(app) {
         this.app = app;
-        
+
+        this.interval = null;
+        this.promptDelay = 3000;
     }
 
     init() {
         this.container = new Container();
-        this.container.zIndex = 100;
-
+      
         this.addBtn();
         subscribeToResize(this);
         return this;
@@ -65,8 +66,17 @@ export default class NextStageBtn {
         this.button.on("pointerout", (e) => (this.shadowFilter.alpha = 0.3));
     }
 
-    async addWhiteHandAnimation() {
-        const spriteSheet = this.app.resources["whiteHandSprite"];
+    startPrompt() {
+        this.playAnimation()
+        this.interval = setInterval(() => this.playAnimation(), 3000);
+    }
+
+    stopPrompt() {
+        clearInterval(this.interval);
+    }
+
+    addWhiteHandAnimation() {
+        const spriteSheet = Assets.get("whiteHandSprite");
         this.animWhiteHand = new AnimatedSprite(spriteSheet.animations.WhiteHand);
 
         this.animWhiteHand.position.set(130, 90);
@@ -75,11 +85,9 @@ export default class NextStageBtn {
         this.animWhiteHand.animationSpeed = 0.5;
         this.animWhiteHand.loop = false;
         this.animWhiteHand.visible = false;
-
         this.animWhiteHand.play();
+       
         this.container.addChild(this.animWhiteHand);
-
-        setInterval(() => this.playAnimation(), 3000);
     }
 
     playAnimation() {
@@ -92,7 +100,6 @@ export default class NextStageBtn {
     }
 
     onResize() {
-
         this.container.position.set(
             this.app.screen.width - 80 * this.app.scale,
             this.app.screen.height - 100 * this.app.scale,

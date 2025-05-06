@@ -6,9 +6,13 @@ import PlayBtn from "./PlayBtn";
 import NextStageBtn from "./NextStageBtn";
 import StageOne from "./StageOne";
 import SpineHuman from "./SpineHuman";
+import Fireworks from "./Fireworks";
+import Match3Board from "./Math3Board";
 
 import Resources from "./Resources";
 import sources from "./sources";
+
+import TESTapi from "../test";
 
 export class Scene {
     constructor(app) {
@@ -27,10 +31,18 @@ export class Scene {
 
         this.zoomTicker = null;
         this.app.scale = 1;
+
+        this.playableStarted = false;
+
+        this.app.zIndexObj = {
+            match3board: 10,
+        };
     }
 
     async init() {
+        this.api = new TESTapi();
         this.app.resources = await new Resources(sources).startLoading();
+        window.playableLoaded();
         this.calcAppScale();
 
         this.sceneContainer = new Container();
@@ -41,17 +53,19 @@ export class Scene {
         this.sceneContainer.addChild(this.nextStageBtn.container);
 
         this.addNextStageListener();
+        this.addUserInteractionListener();
 
         subscribeToResize(this);
     }
 
     addNextStageListener() {
         this.nextStageBtn.button.on("pointerdown", (e) => {
-            if(this.nextStageDisabled) return;
+            if (this.nextStageDisabled) return;
             this.currentStage += 1;
             if (this.currentStage === 1) this.startStageOne();
             if (this.currentStage === 2) this.startStageTwo();
             if (this.currentStage === 3) this.startStageThree();
+            if (this.currentStage >= 3) this.fireworks.startAnimations();
         });
     }
 
@@ -62,9 +76,16 @@ export class Scene {
         this.nextStageBtn = new NextStageBtn(this.app).init();
         this.stageOne = new StageOne(this.app).init();
         this.spineHuman = new SpineHuman(this.app);
+        this.fireworks = new Fireworks(this.app).init();
+        this.match3Board = new Match3Board(this.app);
 
         this.addZoomContainer();
-        this.zoomContainer.addChild(this.background, this.stageOne, this.spineHuman.container);
+        this.zoomContainer.addChild(
+            this.background,
+            this.stageOne,
+            this.spineHuman.container,
+            this.fireworks.container
+        );
 
         this.addLogoContainer();
         this.logoContainer.addChild(this.logo, this.playBtn);
@@ -132,14 +153,13 @@ export class Scene {
         }
     }
 
- 
-
     zoomIn() {
         if (this.zoomTicker) this.app.ticker.remove(this.zoomTicker);
 
         this.zoomTicker = (delta) => {
             const deltaTime = delta.deltaTime;
             this.nextStageDisabled = true;
+            this.nextStageBtn.container.visible = false;
 
             if (this.cameraZoom + 0.01 < this.targetZoom) {
                 this.cameraZoom += (this.targetZoom - this.cameraZoom) * 0.1 * deltaTime;
@@ -148,9 +168,9 @@ export class Scene {
             if (this.initialAlpha + 0.01 < this.targetAlpha) {
                 this.initialAlpha += (this.targetAlpha - this.initialAlpha) * 0.1 * deltaTime;
                 this.stageOne.alpha = this.initialAlpha;
-                
             } else {
                 this.nextStageDisabled = false;
+                this.nextStageBtn.container.visible = true;
             }
         };
 
@@ -169,6 +189,25 @@ export class Scene {
         };
 
         this.app.ticker.add(this.zoomTicker);
+    }
+
+    addUserInteractionListener() {
+        let promptAnimationTimer = setTimeout(() => {
+            this.nextStageBtn.startPrompt();
+        }, this.nextStageBtn.promptDelay);
+
+        ["pointerdown", "keydown"].forEach((event) => {
+            window.addEventListener(event, () => {
+                if(!this.playableStarted) window.playableStarted();
+                this.playableStarted = true;
+
+                this.nextStageBtn.stopPrompt();
+                clearTimeout(promptAnimationTimer);
+                promptAnimationTimer = setTimeout(() => {
+                    this.nextStageBtn.startPrompt();
+                }, this.nextStageBtn.promptDelay);
+            });
+        });
     }
 
     destroy() {

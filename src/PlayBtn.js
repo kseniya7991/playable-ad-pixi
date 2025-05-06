@@ -24,6 +24,7 @@ export default class PlayBtn extends Sprite {
         this.cursor = "pointer";
 
         this.on('pointerdown', (e) => {
+            window.playableGoToStore();
             const os = getOS();
             if(os === 'Android') {
                 window.open("https://play.google.com/store/apps/details?id=com.awem.cradleofempires.andr&hl=en")
