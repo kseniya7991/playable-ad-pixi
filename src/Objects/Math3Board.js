@@ -148,6 +148,12 @@ export default class Match3Board {
         const canSwap = this.canSwap(copyChips);
 
         // Анимация свапа
+        if(canSwap) {
+            this.app.soundManager.play(this.app.soundNames.match, { volume: 0.8 });
+        } else {
+            this.app.soundManager.play(this.app.soundNames.mistake, { volume: 0.8 });
+
+        }
         gsap.to(chip1, {
             x: chip2.col * this.cellSize,
             y: chip2.row * this.cellSize,

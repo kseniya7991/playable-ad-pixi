@@ -1,6 +1,6 @@
 import { Container, Assets, Sprite } from "pixi.js";
 import Match3Board from "./Math3Board";
-import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
+import { subscribeToResize, unsubscribeFromResize } from "../utils/resizeManager";
 
 export default class StageOne {
     constructor(app) {
@@ -23,7 +23,7 @@ export default class StageOne {
     }
 
     async addField() {
-        const textureField = await Assets.load("/assets/field_1_vertical.png");
+        const textureField = Assets.get("field");
         this.field = new Sprite(textureField);
         this.field.anchor.set(0.5, 0.5);
         this.container.addChild(this.field);

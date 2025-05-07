@@ -7,6 +7,7 @@ export default class Resources {
     }
 
     async startLoading() {
+        
         try {
             this.data = await Assets.load(this.sources);
         } catch (error) {
@@ -16,4 +17,5 @@ export default class Resources {
             return this.data;
         }
     }
+  
 }

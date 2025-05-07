@@ -1,6 +1,6 @@
 import { Container, Graphics, Text, AnimatedSprite, Assets } from "pixi.js";
 import { DropShadowFilter } from "pixi-filters";
-import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
+import { subscribeToResize, unsubscribeFromResize } from "../utils/resizeManager";
 
 export default class NextStageBtn {
     constructor(app) {

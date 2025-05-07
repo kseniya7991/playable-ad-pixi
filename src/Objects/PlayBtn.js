@@ -1,5 +1,5 @@
 import { Assets, Sprite } from "pixi.js";
-import { getOS } from "./utils";
+import { getOS } from "../utils/utils";
 
 export default class PlayBtn extends Sprite {
     constructor(app){

@@ -1,5 +1,5 @@
 import { Assets, Sprite } from "pixi.js";
-import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
+import { subscribeToResize, unsubscribeFromResize } from "../utils/resizeManager";
 
 export default class Background extends Sprite {
     constructor(app) {

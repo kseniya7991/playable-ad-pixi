@@ -1,5 +1,5 @@
 import { Application } from "pixi.js";
-import { initResizeManager } from "./resizeManager";
+import { initResizeManager } from "./utils/resizeManager";
 import { Scene } from "./Scene";
 
 (async () => {
