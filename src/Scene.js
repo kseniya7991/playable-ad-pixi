@@ -1,23 +1,23 @@
 import { Container } from "pixi.js";
-import { subscribeToResize, unsubscribeFromResize } from "./resizeManager";
-import Background from "./Background";
-import Logo from "./Logo";
-import PlayBtn from "./PlayBtn";
-import NextStageBtn from "./NextStageBtn";
-import StageOne from "./StageOne";
-import SpineHuman from "./SpineHuman";
-import Fireworks from "./Fireworks";
-import Match3Board from "./Math3Board";
+import { subscribeToResize, unsubscribeFromResize } from "./utils/resizeManager";
+import Background from "./Objects/Background";
+import Logo from "./Objects/Logo";
+import PlayBtn from "./Objects/PlayBtn";
+import NextStageBtn from "./Objects/NextStageBtn";
+import StageOne from "./Objects/StageOne";
+import SpineHuman from "./Objects/SpineHuman";
+import Fireworks from "./Objects/Fireworks";
+import Match3Board from "./Objects/Math3Board";
 
-import Resources from "./Resources";
-import sources from "./sources";
+import Resources from "./resources/Resources";
+import sources from "./resources/sources";
+import SoundManager from "./utils/SoundManager";
 
 import TESTapi from "../test";
 
 export class Scene {
     constructor(app) {
         this.app = app;
-        this.init();
 
         this.nextStageDisabled = false;
 
@@ -37,10 +37,23 @@ export class Scene {
         this.app.zIndexObj = {
             match3board: 10,
         };
+
+        this.app.soundManager = new SoundManager();
+        this.api = new TESTapi();
+
+        this.app.soundNames = {
+            click: "clickSound",
+            bg: "backgroundSound",
+            mistake: "mistakeSound",
+            camera: "cameraSound",
+            match: "matchSound",
+            fireworks: "fireworksSound",
+        };
+
+        this.init();
     }
 
     async init() {
-        this.api = new TESTapi();
         this.app.resources = await new Resources(sources).startLoading();
         window.playableLoaded();
         this.calcAppScale();
@@ -60,12 +73,25 @@ export class Scene {
 
     addNextStageListener() {
         this.nextStageBtn.button.on("pointerdown", (e) => {
+            this.app.soundManager.play(this.app.soundNames.click, { volume: 0.8 });
             if (this.nextStageDisabled) return;
             this.currentStage += 1;
             if (this.currentStage === 1) this.startStageOne();
             if (this.currentStage === 2) this.startStageTwo();
             if (this.currentStage === 3) this.startStageThree();
-            if (this.currentStage >= 3) this.fireworks.startAnimations();
+            if (this.currentStage >= 3) {
+                this.fireworks.startAnimations();
+                this.nextStageDisabled = true;
+                this.nextStageBtn.container.visible = false;
+
+                setTimeout(
+                    () => {
+                        this.nextStageDisabled = false;
+                        this.nextStageBtn.container.visible = true;
+                    },
+                    this.fireworks.animationsCount * this.fireworks.animationDelay + 400
+                );
+            }
         });
     }
 
@@ -156,6 +182,8 @@ export class Scene {
     zoomIn() {
         if (this.zoomTicker) this.app.ticker.remove(this.zoomTicker);
 
+        this.app.soundManager.play(this.app.soundNames.camera, { volume: 0.8 });
+
         this.zoomTicker = (delta) => {
             const deltaTime = delta.deltaTime;
             this.nextStageDisabled = true;
@@ -198,7 +226,10 @@ export class Scene {
 
         ["pointerdown", "keydown"].forEach((event) => {
             window.addEventListener(event, () => {
-                if(!this.playableStarted) window.playableStarted();
+                if (!this.playableStarted) {
+                    window.playableStarted();
+                    this.app.soundManager.play(this.app.soundNames.bg, { loop: true, volume: 0.3 });
+                }
                 this.playableStarted = true;
 
                 this.nextStageBtn.stopPrompt();
