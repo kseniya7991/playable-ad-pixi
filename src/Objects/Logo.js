@@ -11,7 +11,7 @@ export default class Logo extends Sprite {
         const texture = Assets.get('logo');
         this.texture = texture;
 
-        this.scale.set(250 / texture.width);
-        this.position.set(20,20);
+        this.scale.set(160 / texture.width);
+        this.position.set(10,10);
     }
 }
