@@ -12,6 +12,8 @@ export default class Match3Board {
 
         this.chipAliases = ["chipBlue", "chipGreen", "chipRed", "chipYellow", "chipPink"];
 
+        this.isSwapDisabled = false;
+
         this.init();
     }
 
@@ -63,15 +65,17 @@ export default class Match3Board {
         this.container.addChild(chip);
         this.chips[row][col] = chip;
 
+        chip.cursor = "pointer";
+
         return chip;
     }
 
     createRandomType(row, col) {
         let type = Math.floor(Math.random() * Object.values(this.chipTextures).length);
-        const prevRowChip1 = this.chips[row][col - 1]?.type;
-        const prevRowChip2 = this.chips[row][col - 2]?.type;
-        const prevColChip1 = this.chips[row - 1]?.[col].type;
-        const prevColChip2 = this.chips[row - 2]?.[col].type;
+        const prevRowChip1 = this.chips[row]?.[col - 1]?.type;
+        const prevRowChip2 = this.chips[row]?.[col - 2]?.type;
+        const prevColChip1 = this.chips[row - 1]?.[col]?.type;
+        const prevColChip2 = this.chips[row - 2]?.[col]?.type;
 
         // Проверяет, чтобы 3 одинаковые фишки не были рядом
         do {
@@ -85,7 +89,7 @@ export default class Match3Board {
     }
 
     onChipPointerDown(event) {
-        this.swipeStart = {
+        this.swapStart = {
             chip: event.currentTarget,
             row: event.currentTarget.row,
             col: event.currentTarget.col,
@@ -94,11 +98,11 @@ export default class Match3Board {
     }
 
     onChipPointerUp(event) {
-        if (!this.swipeStart) return;
+        if (!this.swapStart) return;
 
         const endPos = event.getLocalPosition(this.container);
-        const dirX = endPos.x - this.swipeStart.pos.x;
-        const dirY = endPos.y - this.swipeStart.pos.y;
+        const dirX = endPos.x - this.swapStart.pos.x;
+        const dirY = endPos.y - this.swapStart.pos.y;
 
         // Определяет направление свапа
         let direction = null;
@@ -112,7 +116,7 @@ export default class Match3Board {
 
         // Определяет фишку для свапа
         if (direction) {
-            let { row, col } = this.swipeStart;
+            let { row, col } = this.swapStart;
             let nextRow = row,
                 nextCol = col;
             switch (direction) {
@@ -130,14 +134,16 @@ export default class Match3Board {
                     break;
             }
 
-            if (this.chips[nextRow] && this.chips[nextRow][nextCol]) {
+            if (this.chips[nextRow] && this.chips[nextRow][nextCol] && !this.isSwapDisabled) {
                 this.swapChips(row, col, nextRow, nextCol);
             }
         }
-        this.swipeStart = null;
+        this.swapStart = null;
     }
 
     swapChips(row1, col1, row2, col2) {
+        this.isSwapDisabled = true;
+        
         // Get interacting chips
         let chip1 = this.chips[row1][col1];
         let chip2 = this.chips[row2][col2];
@@ -148,38 +154,54 @@ export default class Match3Board {
         const canSwap = this.canSwap(copyChips);
 
         // Анимация свапа
-        if(canSwap) {
-            this.app.soundManager.play(this.app.soundNames.match, { volume: 0.8 });
-        } else {
+        if (!canSwap) {
             this.app.soundManager.play(this.app.soundNames.mistake, { volume: 0.8 });
-
         }
-        gsap.to(chip1, {
-            x: chip2.col * this.cellSize,
-            y: chip2.row * this.cellSize,
-            duration: 0.25,
-            onComplete: () => {
-                if (canSwap) return;
-                // Если свап недоступен, возвращает фишку на место
-                gsap.to(chip1, {
-                    x: chip1.col * this.cellSize,
-                    y: chip1.row * this.cellSize,
-                    duration: 0.25,
-                });
-            },
+
+        const anim1 = new Promise((resolve) => {
+            gsap.to(chip1, {
+                x: chip2.col * this.cellSize,
+                y: chip2.row * this.cellSize,
+                duration: 0.25,
+                onComplete: () => {
+                    if (!canSwap) {
+                        // Если свап недоступен, возвращает фишку на место
+                        gsap.to(chip1, {
+                            x: chip1.col * this.cellSize,
+                            y: chip1.row * this.cellSize,
+                            duration: 0.25,
+                            onComplete: resolve,
+                        });
+                    } else {
+                        resolve();
+                    }
+                },
+            });
         });
-        gsap.to(chip2, {
-            x: chip1.col * this.cellSize,
-            y: chip1.row * this.cellSize,
-            duration: 0.25,
-            onComplete: () => {
-                if (canSwap) return;
-                gsap.to(chip2, {
-                    x: chip2.col * this.cellSize,
-                    y: chip2.row * this.cellSize,
-                    duration: 0.25,
-                });
-            },
+
+        const anim2 = new Promise((resolve) => {
+            gsap.to(chip2, {
+                x: chip1.col * this.cellSize,
+                y: chip1.row * this.cellSize,
+                duration: 0.25,
+                onComplete: () => {
+                    if (!canSwap) {
+                        gsap.to(chip2, {
+                            x: chip2.col * this.cellSize,
+                            y: chip2.row * this.cellSize,
+                            duration: 0.25,
+                            onComplete: resolve,
+                        });
+                    } else {
+                        resolve();
+                    }
+                },
+            });
+        });
+
+
+        Promise.all([anim1, anim2]).then(() => {
+           this.isSwapDisabled = false;
         });
 
         // Если свап доступен, меняет местами фишки в массивах
@@ -199,7 +221,13 @@ export default class Match3Board {
         for (let row = 0; row < this.gridSize; row++) {
             let count = 1;
             for (let col = 1; col < this.gridSize; col++) {
-                if (copyChips[row][col].type === copyChips[row][col - 1].type) {
+                const firstChipType = copyChips[row]?.[col]?.type;
+                const secondChipType = copyChips[row]?.[col - 1]?.type;
+                if (
+                    firstChipType !== undefined &&
+                    secondChipType !== undefined &&
+                    firstChipType === secondChipType
+                ) {
                     count++;
                     if (count > 2) return true;
                 } else {
@@ -212,7 +240,14 @@ export default class Match3Board {
         for (let col = 0; col < this.gridSize; col++) {
             let count = 1;
             for (let row = 1; row < this.gridSize; row++) {
-                if (copyChips[row][col].type === copyChips[row - 1][col].type) {
+                const firstChipType = copyChips[row]?.[col]?.type;
+                const secondChipType = copyChips[row - 1]?.[col]?.type;
+
+                if (
+                    firstChipType !== undefined &&
+                    secondChipType !== undefined &&
+                    firstChipType === secondChipType
+                ) {
                     count++;
                     if (count > 2) return true;
                 } else {
@@ -225,12 +260,14 @@ export default class Match3Board {
     }
 
     findMatches() {
+        this.isSwapDisabled = true;
+        let animations = [];
         const matches = [];
         // Горизонтальные совпадения
         for (let row = 0; row < this.gridSize; row++) {
             let count = 1;
             for (let col = 1; col < this.gridSize; col++) {
-                if (this.chips[row][col].type === this.chips[row][col - 1].type) {
+                if (this.chips[row]?.[col]?.type === this.chips[row]?.[col - 1]?.type) {
                     count++;
                 } else {
                     if (count >= 3) {
@@ -251,7 +288,7 @@ export default class Match3Board {
         for (let col = 0; col < this.gridSize; col++) {
             let count = 1;
             for (let row = 1; row < this.gridSize; row++) {
-                if (this.chips[row][col].type === this.chips[row - 1][col].type) {
+                if (this.chips[row]?.[col]?.type === this.chips[row - 1]?.[col]?.type) {
                     count++;
                 } else {
                     if (count >= 3) {
@@ -268,14 +305,108 @@ export default class Match3Board {
                 }
             }
         }
-        // Визуально удаляет совпавшие фишки
+
         matches.forEach((chip) => {
-            gsap.to(chip, {
-                alpha: 0,
-                duration: 0.2,
-            });
+            if (!chip) return;
+            this.chips[chip.row][chip.col] = null;
+
+            animations.push(
+                new Promise((resolve) => {
+                    gsap.to(chip, {
+                        alpha: 0,
+                        duration: 0.2,
+                        onComplete: resolve,
+                    });
+                })
+            );
         });
-        
+
+        if (matches.length > 0) {
+            this.app.soundManager.play(this.app.soundNames.match, { volume: 0.8 });
+            Promise.all(animations).then(() => {
+                setTimeout(() => {
+                    this.dropChips();
+                }, 50);
+            });
+        } else {
+            this.isSwapDisabled = false;
+        }
+
         return Array.from(new Set(matches));
+    }
+
+    dropChips() {
+        const animations = [];
+        for (let col = 0; col < this.gridSize; col++) {
+            let emptyRow = null;
+
+            for (let row = this.gridSize - 1; row >= 0; row--) {
+                const chip = this.chips[row][col];
+
+                if (!chip) {
+                    if (emptyRow === null) emptyRow = row;
+                } else if (emptyRow !== null) {
+                    this.chips[emptyRow][col] = chip;
+                    this.chips[row][col] = null;
+
+                    chip.row = emptyRow;
+                    chip.col = col;
+
+                    animations.push(
+                        new Promise((resolve) => {
+                            gsap.to(chip, {
+                                y: emptyRow * this.cellSize,
+                                duration: 0.25,
+                                onComplete: resolve,
+                            });
+                        })
+                    );
+
+                    emptyRow--;
+                }
+            }
+        }
+
+        Promise.all(animations).then(() => {
+            setTimeout(() => {
+                this.addNewChips();
+            }, 50);
+        });
+    }
+
+    addNewChips() {
+        const animations = [];
+
+        for (let col = 0; col < this.gridSize; col++) {
+            let count = 0;
+            for (let row = this.gridSize - 1; row >= 0; row--) {
+                const chip = this.chips[row][col];
+
+                if (!chip) {
+                    const newChip = this.createChip(row, col);
+                    newChip.y = -this.cellSize * (row + 1);
+                    gsap.set(newChip, { alpha: 0 });
+
+                    animations.push(
+                        new Promise((resolve) => {
+                            gsap.to(newChip, {
+                                y: row * this.cellSize,
+                                duration: 0.3,
+                                delay: count * 0.1,
+                                alpha: 1,
+                                onComplete: resolve,
+                            });
+                        })
+                    );
+                    count++;
+                }
+            }
+        }
+
+        Promise.all(animations).then(() => {
+            setTimeout(() => {
+                this.findMatches();
+            }, 50);
+        });
     }
 }
