@@ -125,7 +125,7 @@ export class Scene {
     }
 
     startStageTwo() {
-        this.stageOne.alpha = 0;
+        this.stageOne.visible = false;
         this.spineHuman.start();
     }
 
@@ -154,13 +154,11 @@ export class Scene {
 
     onResize() {
         this.zoomContainer.position.set(this.app.screen.width / 2, this.app.screen.height / 2);
-
         this.calcAppScale();
         this.updateScale();
     }
 
     updateScale() {
-        this.logoContainer.scale.set(this.app.scale);
         this.nextStageBtn.container.scale.set(this.app.scale);
     }
 
@@ -184,6 +182,7 @@ export class Scene {
         if (this.zoomTicker) this.app.ticker.remove(this.zoomTicker);
 
         this.app.soundManager.play(this.app.soundNames.camera, { volume: 0.8 });
+        this.stageOne.visible = true;
 
         this.zoomTicker = (delta) => {
             const deltaTime = delta.deltaTime;
