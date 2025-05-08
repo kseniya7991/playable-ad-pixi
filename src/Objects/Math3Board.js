@@ -4,7 +4,6 @@ import gsap from "gsap";
 export default class Match3Board {
     constructor(app) {
         this.name = "match3board";
-
         this.app = app;
 
         this.gridSize = 5;
@@ -144,7 +143,7 @@ export default class Match3Board {
     swapChips(row1, col1, row2, col2) {
         this.isSwapDisabled = true;
         
-        // Get interacting chips
+        // Получает интерактивные фишки
         let chip1 = this.chips[row1][col1];
         let chip2 = this.chips[row2][col2];
 

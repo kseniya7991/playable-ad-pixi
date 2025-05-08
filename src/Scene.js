@@ -11,6 +11,7 @@ import Match3Board from "./Objects/Math3Board";
 
 import Resources from "./resources/Resources";
 import sources from "./resources/sources";
+import sounds from "./resources/sounds";
 import SoundManager from "./utils/SoundManager";
 
 import TESTapi from "../test";
@@ -18,44 +19,37 @@ import TESTapi from "../test";
 export class Scene {
     constructor(app) {
         this.app = app;
+        this.app.scale = 1;
 
-        this.nextStageDisabled = false;
-
+        //Zoom
         this.targetZoom = 2;
         this.cameraZoom = 1;
         this.initialCameraZoom = 1;
+        this.zoomTicker = null;
 
+        //Alpha
         this.initialAlpha = 0;
         this.targetAlpha = 1;
-        this.currentStage = 0;
 
-        this.zoomTicker = null;
-        this.app.scale = 1;
-
+        //States
+        this.nextStageDisabled = false;
         this.playableStarted = false;
+
+        this.currentStage = 0;
 
         this.app.zIndexObj = {
             match3board: 10,
         };
 
-        this.app.soundManager = new SoundManager();
         this.api = new TESTapi();
-
-        this.app.soundNames = {
-            click: "clickSound",
-            bg: "backgroundSound",
-            mistake: "mistakeSound",
-            camera: "cameraSound",
-            match: "matchSound",
-            fireworks: "fireworksSound",
-        };
+        this.app.soundManager = new SoundManager();
+        this.app.soundNames = sounds;
 
         this.init();
     }
 
     async init() {
-        this.app.resources = await new Resources(sources).startLoading();
-        window.playableLoaded();
+        await this.loadPlayable();
         this.calcAppScale();
 
         this.sceneContainer = new Container();
@@ -63,13 +57,16 @@ export class Scene {
 
         this.addObjectsToScene();
 
-        this.sceneContainer.addChild(this.nextStageBtn.container);
-
         this.addNextStageListener();
         this.addUserInteractionListener();
         this.addVisibilityChangeListener();
 
         subscribeToResize(this);
+    }
+
+    async loadPlayable() {
+        this.app.resources = await new Resources(sources).startLoading();
+        window.playableLoaded();
     }
 
     addNextStageListener() {
@@ -116,6 +113,8 @@ export class Scene {
 
         this.addLogoContainer();
         this.logoContainer.addChild(this.logo, this.playBtn);
+
+        this.sceneContainer.addChild(this.nextStageBtn.container);
     }
 
     startStageOne() {
@@ -224,7 +223,6 @@ export class Scene {
             this.nextStageBtn.startPrompt();
         }, this.nextStageBtn.promptDelay);
 
-
         ["pointerdown", "keydown"].forEach((event) => {
             window.addEventListener(event, () => {
                 if (!this.playableStarted) {
@@ -247,7 +245,6 @@ export class Scene {
             console.log("visibility changed", document.hidden);
             if (document.hidden) {
                 this.app.soundManager.pauseAllSounds();
-                
             } else {
                 this.app.soundManager.resumeAllSounds();
             }

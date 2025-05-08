@@ -32,8 +32,10 @@ export default class StageOne {
 
     onResize() {
         this.container.scale.set(this.app.scale * 0.8);
+    }
 
-
+    destroy() {
+        unsubscribeFromResize(this)
     }
   
 }

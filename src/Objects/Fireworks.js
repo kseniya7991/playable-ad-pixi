@@ -23,6 +23,8 @@ export default class Fireworks {
 
     createFireworksAnimation() {
         const animation = new AnimatedSprite(this.spriteSheet.animations.fireworks);
+        this.container.addChild(animation);
+        
         animation.position.set(
             (Math.random() * this.app.screen.width) / 4 - this.app.screen.width / 8,
             (Math.random() * this.app.screen.width) / 4 - this.app.screen.width / 8
@@ -33,7 +35,6 @@ export default class Fireworks {
         animation.onComplete = () => {
             this.container.removeChild(animation);
         };
-        this.container.addChild(animation);
         animation.play();
         this.app.soundManager.play(this.app.soundNames.fireworks, { volume: 0.5 });
     }

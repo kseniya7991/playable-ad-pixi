@@ -25,22 +25,6 @@ export default [
         src: "https://raw.githubusercontent.com/pixijs/spine-v8/main/examples/assets/spineboy-pma.atlas",
     },
     {
-        alias: "spineGoblinsAtlas",
-        src: "/assets/spine/goblins.atlas",
-    },
-    {
-        alias: "spineGoblinsJson",
-        src: "/assets/spine/goblins.json",
-    },
-    {
-        alias: "spineGoblinsImg",
-        src: "/assets/spine/goblins.png",
-    },
-    {
-        alias: "spineAtlas",
-        src: "https://raw.githubusercontent.com/pixijs/spine-v8/main/examples/assets/spineboy-pma.atlas",
-    },
-    {
         alias: "fireworksSprite",
         src: "/assets/sprites/fireworks/fireworks.json",
     },
@@ -97,5 +81,5 @@ export default [
         alias: "fireworksSound",
         src: "/assets/sounds/fireworks-sound.mp3",
         data: soundAsset,
-    }
+    },
 ];

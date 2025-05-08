@@ -5,7 +5,6 @@ import { subscribeToResize, unsubscribeFromResize } from "../utils/resizeManager
 export default class NextStageBtn {
     constructor(app) {
         this.app = app;
-
         this.interval = null;
         this.promptDelay = 3000;
     }
@@ -45,7 +44,6 @@ export default class NextStageBtn {
         this.button.filters = [this.shadowFilter];
 
         this.container.pivot.set(this.button.width, this.button.height);
-
         this.container.position.set(
             this.app.screen.width - 80,
             this.app.screen.height - 100
