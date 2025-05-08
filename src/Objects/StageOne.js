@@ -30,7 +30,7 @@ export default class StageOne {
     }
 
     onResize() {
-        this.container.scale.set(this.app.scale * 0.7);
+        this.container.scale.set(this.app.scale * 0.9);
     }
   
 }

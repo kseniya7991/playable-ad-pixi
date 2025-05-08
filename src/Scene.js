@@ -67,6 +67,7 @@ export class Scene {
 
         this.addNextStageListener();
         this.addUserInteractionListener();
+        this.addVisibilityChangeListener();
 
         subscribeToResize(this);
     }
@@ -224,6 +225,7 @@ export class Scene {
             this.nextStageBtn.startPrompt();
         }, this.nextStageBtn.promptDelay);
 
+
         ["pointerdown", "keydown"].forEach((event) => {
             window.addEventListener(event, () => {
                 if (!this.playableStarted) {
@@ -238,6 +240,18 @@ export class Scene {
                     this.nextStageBtn.startPrompt();
                 }, this.nextStageBtn.promptDelay);
             });
+        });
+    }
+
+    addVisibilityChangeListener() {
+        window.addEventListener("visibilitychange", () => {
+            console.log("visibility changed", document.hidden);
+            if (document.hidden) {
+                this.app.soundManager.pauseAllSounds();
+                
+            } else {
+                this.app.soundManager.resumeAllSounds();
+            }
         });
     }
 

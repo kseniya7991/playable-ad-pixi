@@ -22,4 +22,12 @@ export default class SoundManager {
     delete(name) {
         if(sound.exists(name)) sound.remove(name);
     }
+
+    pauseAllSounds() {
+        sound.pauseAll();
+    }
+
+    resumeAllSounds() {
+        sound.resumeAll();
+    }
 }
