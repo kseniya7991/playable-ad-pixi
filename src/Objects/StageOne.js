@@ -12,6 +12,7 @@ export default class StageOne {
     init() {
         this.container = new Container();
         this.container.alpha = 0;
+        this.container.visible = false;
     
         this.addField();
         this.match3Board = new Match3Board(this.app);
@@ -30,7 +31,9 @@ export default class StageOne {
     }
 
     onResize() {
-        this.container.scale.set(this.app.scale * 0.9);
+        this.container.scale.set(this.app.scale * 0.8);
+
+
     }
   
 }
